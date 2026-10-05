@@ -24,7 +24,7 @@
             background: #0d6efd;
             color: #fff;
             cursor: pointer;
-            min-width: 220px;
+            min-width: 240px;
         }
         button:hover {
             background: #0b5ed7;
@@ -33,15 +33,16 @@
 </head>
 <body>
     <button id="close-btn">Close</button>
-    <button id="close-redirect-btn">Close + Redirect</button>
+    <button id="close-redirect-btn">Close + Redirect (internal)</button>
+    <button id="close-redirect-external-btn">Close + Redirect (external, new tab)</button>
     <button id="close-refresh-btn">Close + Refresh</button>
     <script>
-        function postCloseMessage(action, url) {
+        function postCloseMessage(action, params) {
             window.parent.postMessage(
                 {
                     type: 'ccl-custom-code-modal-close',
                     action: action,
-                    url: url,
+                    params: params,
                 },
                 '*'
             );
@@ -52,7 +53,11 @@
         });
 
         document.getElementById('close-redirect-btn').addEventListener('click', function () {
-            postCloseMessage('navigate', '/admin');
+            postCloseMessage('navigate', 'url:/admin');
+        });
+
+        document.getElementById('close-redirect-external-btn').addEventListener('click', function () {
+            postCloseMessage('navigate', 'url:https://example.com,target:_blank');
         });
 
         document.getElementById('close-refresh-btn').addEventListener('click', function () {
