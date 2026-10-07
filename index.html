@@ -33,7 +33,9 @@
 </head>
 <body>
     <button id="close-btn">Close</button>
-    <button id="close-redirect-btn">Close + Redirect (internal)</button>
+    <button id="close-redirect-btn">Close + Redirect (internal CLM)</button>
+    <button id="close-redirect-btn-3">Close + Redirect (internal CPQ)</button>
+    <button id="close-redirect-btn-2">Close + Redirect (internal New tab with dynamic Id)</button>
     <button id="close-redirect-external-btn">Close + Redirect (external, new tab)</button>
     <button id="close-refresh-btn">Close + Refresh</button>
     <script>
@@ -53,12 +55,22 @@
         });
 
         document.getElementById('close-redirect-btn').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:/cpq/quotes/{recordId},,target:_blank');
+            postCloseMessage('navigate', 'url:/clm/detail{recordId}?custom=yes');
+        });
+
+        document.getElementById('close-redirect-btn-2').addEventListener('click', function () {
+            postCloseMessage('navigate', 'url:/clm/detail{recordId},target:_blank');
+        });
+
+        document.getElementById('close-redirect-btn-3').addEventListener('click', function () {
+            postCloseMessage('navigate', 'url:/cpq/quotes/{recordId}');
         });
 
         document.getElementById('close-redirect-external-btn').addEventListener('click', function () {
             postCloseMessage('navigate', 'url:https://example.com,target:_blank');
         });
+
+        
 
         document.getElementById('close-refresh-btn').addEventListener('click', function () {
             postCloseMessage('refresh');
