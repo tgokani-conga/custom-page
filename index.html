@@ -55,11 +55,11 @@
         });
 
         document.getElementById('close-redirect-btn').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:/clm/detail{recordId}?custom=yes');
+            postCloseMessage('navigate', 'url:/clm/detail{recordId}');
         });
 
         document.getElementById('close-redirect-btn-2').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:/clm/detail{recordId},target:_blank');
+            postCloseMessage('navigate', 'url:/clm/detail/{recordId},target:_blank');
         });
 
         document.getElementById('close-redirect-btn-3').addEventListener('click', function () {
