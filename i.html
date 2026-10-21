@@ -1,63 +1,143 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Close</title>
-    <style>
-        html,
-        body {
-            margin: 0;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-family: Arial, sans-serif;
-            background: #ffffff;
-        }
-        button {
-            padding: 10px 24px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            background: #0d6efd;
-            color: #fff;
-            cursor: pointer;
-            min-width: 240px;
-        }
-        button:hover {
-            background: #0b5ed7;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request Legal Review</title>
+<style>
+  :root {
+    --navy: #0b1f4b;
+    --blue: #1f6feb;
+    --blue-dark: #1757bd;
+    --line: #d9dee8;
+    --bg: #f5f7fb;
+    --text: #1c2433;
+    --muted: #5b6577;
+    --ok: #16794c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 24px 96px; }
+  h1 { font-size: 18px; margin: 0 0 4px; color: var(--navy); }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .full { grid-column: 1 / -1; }
+  label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; }
+  input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: #fff; }
+  input[readonly] { background: #eef1f6; color: var(--muted); }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--blue); outline-offset: -1px; }
+  textarea { min-height: 76px; resize: vertical; }
+  .err { color: #b42318; font-size: 12px; margin-top: 3px; min-height: 14px; }
+  .footer { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line); padding: 12px 24px; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 6px; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--text); }
+  button:hover { background: #f0f3f9; }
+  button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  button.primary:hover { background: var(--blue-dark); }
+  button.secondary { border-color: var(--blue); color: var(--blue); }
+  .status { margin-top: 14px; padding: 10px 12px; border-radius: 6px; background: #e8f5ee; color: var(--ok); display: none; font-weight: 600; }
+  .debug { margin-top: 14px; font: 12px/1.4 Consolas, monospace; background: #101828; color: #c9d4ea; border-radius: 6px; padding: 10px 12px; display: none; white-space: pre-wrap; }
+</style>
 </head>
 <body>
-    <button id="close-btn">Close</button>
-    <button id="close-redirect-external-btn">Close + Navigate (New tab)</button>
-    <button id="close-refresh-btn">Close + Refresh</button>
-    <script>
-        function postCloseMessage(action, params) {
-            window.parent.postMessage(
-                {
-                    type: 'ccl-custom-code-modal-close',
-                    action: action,
-                    params: params,
-                },
-                '*'
-            );
-        }
+<div class="wrap">
+  <h1>Request Legal Review</h1>
+  <p class="sub">Send this agreement to Legal for review before it goes out for signature.</p>
 
-        document.getElementById('close-btn').addEventListener('click', function () {
-            postCloseMessage();
-        });
+  <form class="card" id="f" novalidate>
+    <div class="grid">
+      <div>
+        <label for="rid">Agreement ID</label>
+        <input id="rid" readonly>
+      </div>
+      <div>
+        <label for="disc">Review Due (days)</label>
+        <input id="disc" type="number" min="1" max="30" value="5">
+        <div class="err" data-for="disc"></div>
+      </div>
+      <div>
+        <label for="appr">Reviewer</label>
+        <select id="appr">
+          <option>Legal Counsel</option>
+          <option>Contracts Manager</option>
+          <option>Compliance Officer</option>
+        </select>
+      </div>
+      <div>
+        <label for="prio">Priority</label>
+        <select id="prio"><option>Normal</option><option>High</option><option>Urgent</option></select>
+      </div>
+      <div class="full">
+        <label for="why">Notes for Reviewer</label>
+        <textarea id="why" placeholder="Which clauses or changes need attention?"></textarea>
+        <div class="err" data-for="why"></div>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+  </form>
 
-        document.getElementById('close-redirect-external-btn').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:https://example.com,target:_blank');
-        });  
+  <div class="debug" id="debug"></div>
+</div>
 
-        document.getElementById('close-refresh-btn').addEventListener('click', function () {
-            postCloseMessage('refresh');
-        });
-    </script>
+<div class="footer">
+  <!-- 1. close only -->
+  <button type="button" id="cancel">Cancel</button>
+  <!-- 2. close + refresh host page -->
+  <button type="button" class="secondary" id="save">Save Draft &amp; Refresh</button>
+  <!-- 3. close + navigate -->
+  <button type="button" class="primary" id="submit">Submit &amp; Open Agreement</button>
+</div>
+
+<script>
+  var TYPE = 'ccl-custom-code-modal-close';
+  var params = new URLSearchParams(location.search);
+  var recordId = params.get('recordId') || 'a1B5g000003XYZ';
+  document.getElementById('rid').value = recordId;
+
+  var inIframe = window.parent !== window;
+  var debug = document.getElementById('debug');
+  var status = document.getElementById('status');
+
+  function validate() {
+    var ok = true;
+    var d = Number(document.getElementById('disc').value);
+    var why = document.getElementById('why').value.trim();
+    document.querySelector('[data-for=disc]').textContent = (d >= 1 && d <= 30) ? '' : 'Enter a value from 1 to 30';
+    document.querySelector('[data-for=why]').textContent = why ? '' : 'Notes are required';
+    if (!(d >= 1 && d <= 30) || !why) ok = false;
+    return ok;
+  }
+
+  // Shows the user what happened, then sends the message after a short beat
+  // so the audience can see the page before the modal closes.
+  function send(msg, label) {
+    status.style.display = 'block';
+    status.textContent = label;
+    var text = 'postMessage → ' + JSON.stringify(msg, null, 2);
+    if (!inIframe) {
+      debug.style.display = 'block';
+      debug.textContent = '(opened standalone, not in the CCL modal)\n' + text;
+    }
+    setTimeout(function () { window.parent.postMessage(msg, '*'); }, 900);
+  }
+
+  document.getElementById('cancel').onclick = function () {
+    send({ type: TYPE }, 'Closing without changes…');
+  };
+
+  document.getElementById('save').onclick = function () {
+    if (!validate()) return;
+    send({ type: TYPE, action: 'refresh' }, 'Draft saved. Refreshing the agreement…');
+  };
+
+  document.getElementById('submit').onclick = function () {
+    if (!validate()) return;
+    send({
+      type: TYPE,
+      action: 'navigate',
+      payload: { url: '/clm/detail/' + recordId }
+    }, 'Sent to Legal. Opening the agreement…');
+  };
+</script>
 </body>
 </html>
