@@ -51,23 +51,9 @@
             postCloseMessage();
         });
 
-        document.getElementById('close-redirect-btn').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:/cpq/quotes/{recordId}');
-        });
-
-        document.getElementById('close-redirect-btn-2').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:/clm/detail/{recordId},target:_blank');
-        });
-
-        document.getElementById('close-redirect-btn-3').addEventListener('click', function () {
-            postCloseMessage('navigate', 'url:/cpq/quotes/{recordId}');
-        });
-
         document.getElementById('close-redirect-external-btn').addEventListener('click', function () {
             postCloseMessage('navigate', 'url:https://example.com,target:_blank');
-        });
-
-        
+        });  
 
         document.getElementById('close-refresh-btn').addEventListener('click', function () {
             postCloseMessage('refresh');
