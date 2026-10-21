@@ -47,13 +47,8 @@
   <form class="card" id="f" novalidate>
     <div class="grid">
       <div>
-        <label for="rid">Agreement ID</label>
-        <input id="rid" readonly>
-      </div>
-      <div>
         <label for="disc">Review Due (days)</label>
         <input id="disc" type="number" min="1" max="30" value="5">
-        <div class="err" data-for="disc"></div>
       </div>
       <div>
         <label for="appr">Reviewer</label>
@@ -69,9 +64,7 @@
       </div>
       <div class="full">
         <label for="why">Notes for Reviewer</label>
-        <textarea id="why" placeholder="Which clauses or changes need attention?"></textarea>
-        <div class="err" data-for="why"></div>
-      </div>
+        <textarea id="why" placeholder="Which clauses or changes need attention?"></textarea>      </div>
     </div>
     <div class="status" id="status"></div>
   </form>
@@ -90,53 +83,34 @@
 
 <script>
   var TYPE = 'ccl-custom-code-modal-close';
-  var params = new URLSearchParams(location.search);
-  var recordId = params.get('recordId') || 'a1B5g000003XYZ';
-  document.getElementById('rid').value = recordId;
-
   var inIframe = window.parent !== window;
-  var debug = document.getElementById('debug');
-  var status = document.getElementById('status');
+  var debugEl = document.getElementById('debug');
+  var statusEl = document.getElementById('status');
 
-  function validate() {
-    var ok = true;
-    var d = Number(document.getElementById('disc').value);
-    var why = document.getElementById('why').value.trim();
-    document.querySelector('[data-for=disc]').textContent = (d >= 1 && d <= 30) ? '' : 'Enter a value from 1 to 30';
-    document.querySelector('[data-for=why]').textContent = why ? '' : 'Notes are required';
-    if (!(d >= 1 && d <= 30) || !why) ok = false;
-    return ok;
-  }
-
+  // {recordId} is sent as-is; the host replaces it with the current record's ID.
   // Shows the user what happened, then sends the message after a short beat
   // so the audience can see the page before the modal closes.
-  function send(msg, label) {
-    status.style.display = 'block';
-    status.textContent = label;
-    var text = 'postMessage → ' + JSON.stringify(msg, null, 2);
+  function send(action, params, label) {
+    var msg = { type: TYPE, action: action, params: params };
+    statusEl.style.display = 'block';
+    statusEl.textContent = label;
     if (!inIframe) {
-      debug.style.display = 'block';
-      debug.textContent = '(opened standalone, not in the CCL modal)\n' + text;
+      debugEl.style.display = 'block';
+      debugEl.textContent = '(opened standalone, not in the CCL modal)\npostMessage → ' + JSON.stringify(msg, null, 2);
     }
     setTimeout(function () { window.parent.postMessage(msg, '*'); }, 900);
   }
 
   document.getElementById('cancel').onclick = function () {
-    send({ type: TYPE }, 'Closing without changes…');
+    send(undefined, undefined, 'Closing without changes…');
   };
 
   document.getElementById('save').onclick = function () {
-    if (!validate()) return;
-    send({ type: TYPE, action: 'refresh' }, 'Draft saved. Refreshing the agreement…');
+    send('refresh', undefined, 'Draft saved. Refreshing the agreement…');
   };
 
   document.getElementById('submit').onclick = function () {
-    if (!validate()) return;
-    send({
-      type: TYPE,
-      action: 'navigate',
-      payload: { url: '/clm/detail/' + recordId }
-    }, 'Sent to Legal. Opening the agreement…');
+    send('navigate', 'url:/clm/detail/{recordId}', 'Sent to Legal. Opening the agreement…');
   };
 </script>
 </body>
